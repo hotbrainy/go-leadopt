@@ -1,6 +1,7 @@
 {{ define "home" }}
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8" />
   <title>Leadopt</title>
@@ -112,16 +113,16 @@
         </tr>
       </thead>
       <tbody>
-        {{ range.profiles }}
+        {{ range $index, $profile:= .profiles }}
         <tr>
-          <th scope="row">1</th>
-          <td><img src="{{.Avatar}}" alt="{{.Avatar}}" /></td>
-          <td>{{.FirstName}} {{.LastName}}</td>
-          <td>{{ .Connections }}</td>
-          <td>{{ .ConnectionDist }}</td>
-          <td>{{ .LinkedInURL }}</td>
-          <td>{{ .CreatedAt | since }} ago</td>
-          <td>{{ .Activity }} </td>
+          <th scope="row">{{add $index 1}}</th>
+          <td><img src="{{$profile.Avatar}}" alt="{{$profile.Avatar}}" /></td>
+          <td>{{$profile.FirstName}} {{$profile.LastName}}</td>
+          <td>{{ $profile.Connections }}</td>
+          <td>{{ $profile.ConnectionDist }}</td>
+          <td>{{ $profile.LinkedInURL }}</td>
+          <td>{{ $profile.CreatedAt | since }} ago</td>
+          <td>{{ $profile.Activity }} </td>
         </tr>
         {{ else }}
         <div class="alert alert-info" role="alert">

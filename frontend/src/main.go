@@ -44,6 +44,7 @@ func main() {
 	// Parse html templates and save them to global variable.
 	t, err := template.New("").Funcs(map[string]interface{}{
 		"since": sinceDate,
+		"add":   add,
 	}).ParseGlob("templates/*.tpl")
 	if err != nil {
 		log.Fatalf("could not parse templates: %+v", err)
@@ -187,3 +188,7 @@ func (f *frontendServer) saveProfile(first_name, last_name, avatar, linkedin_url
 
 // sinceDate is used in the html template to display human-friendly dates.
 func sinceDate(t time.Time) string { return time.Since(t).Truncate(time.Second).String() }
+
+func add(x, y int) int {
+	return x + y
+}
