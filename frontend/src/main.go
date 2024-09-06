@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -17,26 +17,29 @@ var (
 	tpl *template.Template
 )
 
-// leadoptEntry represents the message object returned from the backend API.
-type leadoptEntry struct {
-	Author  string    `json:"author"`
-	Message string    `json:"message"`
-	Date    time.Time `json:"date"`
+// Profile represents the message object returned from the backend API.
+
+type Profile struct {
+	FirstName      string    `valid:"stringlength(5|20)" json:"first_name" bson:"first_name"`
+	LastName       string    `valid:"stringlength(5|20)" json:"last_name" bson:"last_name"`
+	LinkedInURL    string    `json:"linkedin_url" bson:"linkedin_url"`
+	Avatar         string    `json:"avatar" bson:"avatar"`
+	Company        string    `json:"company" bson:"company"`
+	Position       string    `json:"position" bson:"position"`
+	Connections    string    `json:"connections" bson:"connections"`
+	ConnectionDist string    `json:"connection_dist" bson:"connection_dist"`
+	TimeInRole     string    `json:"time_in_role" bson:"time_in_role"`
+	Activity       string    `json:"activity" bson:"activity"`
+	CreatedAt      time.Time `json:"created_at" bson:"created_at"`
 }
 
 // main starts a frontend server and connects to the backend.
 func main() {
 	// LEADOPT_API_ADDR environment variable is provided in leadopt-frontend.deployment.yaml.
-	backendAddr := os.Getenv("LEADOPT_API_ADDR")
-	if backendAddr == "" {
-		log.Fatal("LEADOPT_API_ADDR environment variable not specified")
-	}
+	backendAddr := (map[bool]string{true: "localhost:8081", false: os.Getenv("LEADOPT_API_ADDR")})[os.Getenv("LEADOPT_API_ADDR") == ""]
 
 	// PORT environment variable is provided in leadopt-frontend.deployment.yaml.
-	port := os.Getenv("PORT")
-	if port == "" {
-		log.Fatal("PORT environment variable not specified")
-	}
+	port := (map[bool]string{true: "8080", false: os.Getenv("PORT")})[os.Getenv("PORT") == ""]
 
 	// Parse html templates and save them to global variable.
 	t, err := template.New("").Funcs(map[string]interface{}{
@@ -76,14 +79,14 @@ func (f *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("querying backend for entries: %s", f.backendAddr)
-	resp, err := http.Get(fmt.Sprintf("http://%s/messages", f.backendAddr))
+	resp, err := http.Get(fmt.Sprintf("http://%s/api/profile", f.backendAddr))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("querying backend failed: %+v", err), http.StatusInternalServerError)
 		return
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to read response body: %+v", err), http.StatusInternalServerError)
 		return
@@ -95,7 +98,7 @@ func (f *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("parsing backend response into json")
-	var v []leadoptEntry
+	var v []Profile
 	if err := json.Unmarshal(body, &v); err != nil {
 		log.Printf("WARNING: failed to decode json from the api: %+v input=%q", err, string(body))
 		http.Error(w,
@@ -104,15 +107,16 @@ func (f *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("retrieved %d messages from the backend api", len(v))
+	log.Printf("retrieved %d profile from the backend api", len(v))
+
 	if err := tpl.ExecuteTemplate(w, "home", map[string]interface{}{
-		"messages": v,
+		"profiles": v,
 	}); err != nil {
 		log.Printf("WARNING: failed to render html template: %+v", err)
 	}
 }
 
-// postHandler handles POST requests to /messages.
+// postHandler handles POST requests to /api/profile.
 func (f *frontendServer) postHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("received request: %s %s", r.Method, r.URL.Path)
 	if r.Method != http.MethodPost {
@@ -120,18 +124,30 @@ func (f *frontendServer) postHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	author := r.FormValue("name")
-	message := r.FormValue("message")
-	if author == "" {
-		http.Error(w, `"name" not specified in the form`, http.StatusBadRequest)
-		return
-	}
-	if message == "" {
-		http.Error(w, `"message" not specified in the form`, http.StatusBadRequest)
+	first_name := r.FormValue("first_name")
+	last_name := r.FormValue("last_name")
+	avatar := r.FormValue("avatar")
+	linkedin_url := r.FormValue("linkedin_url")
+	company := r.FormValue("company")
+	position := r.FormValue("position")
+	connections := r.FormValue("connections")
+	connection_dist := r.FormValue("connection_dist")
+	activity := r.FormValue("activity")
+	if first_name == "" {
+		http.Error(w, `"first_name" not specified in the form`, http.StatusBadRequest)
 		return
 	}
 
-	if err := f.saveMessage(r.FormValue("name"), r.FormValue("message")); err != nil {
+	if first_name == "" {
+		http.Error(w, `"first_name" not specified in the form`, http.StatusBadRequest)
+		return
+	}
+	if last_name == "" {
+		http.Error(w, `"last_name" not specified in the form`, http.StatusBadRequest)
+		return
+	}
+
+	if err := f.saveProfile(first_name, last_name, avatar, linkedin_url, company, position, connections, connection_dist, activity); err != nil {
 		http.Error(w, fmt.Sprintf("failed to save message: %+v", err), http.StatusInternalServerError)
 		return
 	}
@@ -139,18 +155,26 @@ func (f *frontendServer) postHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound) // redirect to homepage
 }
 
-// saveMessage makes a request to the backend to persist the message.
-func (f *frontendServer) saveMessage(author, message string) error {
-	entry := leadoptEntry{
-		Author:  author,
-		Message: message,
+// saveProfile makes a request to the backend to persist the message.
+func (f *frontendServer) saveProfile(first_name, last_name, avatar, linkedin_url, company, position, conns, condist, activity string) error {
+	entry := Profile{
+		FirstName:      first_name,
+		LastName:       last_name,
+		Avatar:         avatar,
+		LinkedInURL:    linkedin_url,
+		Company:        company,
+		Position:       position,
+		Connections:    conns,
+		ConnectionDist: condist,
+		Activity:       activity,
+		CreatedAt:      time.Now(),
 	}
 	body, err := json.Marshal(entry)
 	if err != nil {
 		return fmt.Errorf("failed to serialize message into json: %+v", err)
 	}
 
-	resp, err := http.Post(fmt.Sprintf("http://%s/messages", f.backendAddr), "application/json", bytes.NewReader(body))
+	resp, err := http.Post(fmt.Sprintf("http://%s/api/profile", f.backendAddr), "application/json", bytes.NewReader(body))
 	if err != nil {
 		return fmt.Errorf("backend returned failure: %+v", err)
 	}

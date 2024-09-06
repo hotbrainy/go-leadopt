@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: go-leadopt-frontend
   labels:
     app: frontend
 spec:
@@ -26,4 +26,4 @@ spec:
         - name: PORT
           value: "8080"
         - name: LEADOPT_API_ADDR
-          value: backend:8081
+          value: go-leadopt-backend:8081

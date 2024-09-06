@@ -1,0 +1,17 @@
+kubectl exec -it $(kubectl get pods | grep mongo |awk '{print $1}')  -- bash
+kubectl exec -it $(kubectl get pods | grep lead-opt |awk '{print $1}')  -- bash
+
+
+docker rmi $(docker images --format '{{.ID}} {{.Repository}}' |  grep go-leadopt | awk '{print $1}')
+
+docker rm $(docker images|  grep go-leadopt | awk '{print $1}')
+
+
+minikube service --all
+
+kubectl get pv
+kubectl get pvc
+
+kubectl apply -f backend/templates/mongo.persistent.volume.yaml
+kubectl apply -f backend/templates/mongo.persistent.volume-claim.yaml
+kubectl apply -f backend/templates/mongo.deployment.yaml

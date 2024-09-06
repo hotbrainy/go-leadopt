@@ -1,119 +1,36 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
 	"log"
-	"net/http"
 	"os"
-	"time"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"github.com/hotbrainy/go-leadopt/backend/controllers"
+	"github.com/hotbrainy/go-leadopt/backend/db"
+	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/mvc"
 )
 
-// leadoptEntry represents the message object returned in the API.
-type leadoptEntry struct {
-	Author  string    `json:"author" bson:"author"`
-	Message string    `json:"message" bson:"message"`
-	Date    time.Time `json:"date" bson:"date"`
-}
-
-type leadoptServer struct {
-	db database
-}
-
-// main starts a server listening on $PORT responding to requests "GET
-// /messages" and "POST /messages" with a JSON API.
 func main() {
-	ctx := context.Background()
+	db := &db.Conn{}
+	db.Init()
 
-	// PORT environment variable is set in leadopt-backend.deployment.yaml.
-	port := os.Getenv("PORT")
+	app := iris.New()
+
+	api := app.Party("/api")
+	api.Use(iris.Compression)
+	{
+		profileAPI := api.Party("/profile")
+		m := mvc.New(profileAPI)
+		m.Handle(new(controllers.ProfileController))
+	}
+
+	port := (map[bool]string{true: "8081", false: os.Getenv("PORT")})[os.Getenv("PORT") == ""]
+
 	if port == "" {
 		log.Fatal("PORT environment variable not specified")
 	}
-	// LEADOPT_DB_ADDR environment variable is set in leadopt-backend.deployment.yaml.
-	dbAddr := os.Getenv("LEADOPT_DB_ADDR")
-	if dbAddr == "" {
-		log.Fatal("LEADOPT_DB_ADDR environment variable not specified")
-	}
 
-	mongoURI := "mongodb://" + dbAddr
-	connCtx, cancel := context.WithTimeout(ctx, time.Second*30)
-	defer cancel()
-	dbConn, err := mongo.Connect(connCtx, options.Client().ApplyURI(mongoURI))
-	if err != nil {
-		log.Fatalf("failed to initialize connection to mongodb: %+v", err)
-	}
-	if err := dbConn.Ping(connCtx, readpref.Primary()); err != nil {
-		log.Fatalf("ping to mongodb failed: %+v", err)
-	}
-
-	gs := &leadoptServer{
-		db: &mongodb{
-			conn: dbConn,
-		},
-	}
-
-	log.Printf("backend server listening on port %s", port)
-	http.Handle("/messages", gs)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	if err := app.Listen(":" + port); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func (s *leadoptServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Printf("received request: method=%s path=%s", r.Method, r.URL.Path)
-	if r.Method == http.MethodGet {
-		s.getMessagesHandler(w, r)
-	} else if r.Method == http.MethodPost {
-		s.postMessageHandler(w, r)
-	} else {
-		http.Error(w, fmt.Sprintf("unsupported method %s", r.Method), http.StatusMethodNotAllowed)
-	}
-}
-
-func (s *leadoptServer) getMessagesHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	entries, err := s.db.entries(r.Context())
-	if err != nil {
-		http.Error(w, fmt.Sprintf("failed to read entries: %+v", err), http.StatusInternalServerError)
-		// TODO return JSON error
-		return
-	}
-	if err := json.NewEncoder(w).Encode(entries); err != nil {
-		log.Printf("WARNING: failed to encode json into response: %+v", err)
-	} else {
-		log.Printf("%d entries returned", len(entries))
-	}
-}
-
-func (s *leadoptServer) postMessageHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	defer r.Body.Close()
-
-	var v leadoptEntry
-	if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
-		http.Error(w, fmt.Sprintf("failed to decode request body into json: %+v", err), http.StatusBadRequest)
-		return
-	}
-	if v.Author == "" {
-		http.Error(w, "empty 'author' value", http.StatusBadRequest)
-		return
-	}
-	if v.Message == "" {
-		http.Error(w, "empty 'message' value", http.StatusBadRequest)
-		return
-	}
-
-	v.Date = time.Now()
-
-	if err := s.db.addEntry(r.Context(), v); err != nil {
-		http.Error(w, fmt.Sprintf("failed to save entry: %+v", err), http.StatusInternalServerError)
-		return
-	}
-	log.Printf("entry saved: author=%q message=%q", v.Author, v.Message)
 }

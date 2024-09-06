@@ -15,6 +15,7 @@ build:
 manifests:
   rawYaml:
   - frontend/k8s/*.yaml
+  # - backend/templates/*.yaml
   helm:
     releases:
     - name: backend
