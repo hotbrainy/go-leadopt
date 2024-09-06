@@ -5,9 +5,11 @@ metadata:
   labels:
     app: {{ .Values.service}}
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: {{ .Values.service}}
   ports:
-    - port: 8081
+    - protocol: TCP
+      port: 8081
       targetPort: http-server
+      nodePort: 30000
