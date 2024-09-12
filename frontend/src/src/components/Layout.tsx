@@ -104,6 +104,11 @@ export default function RootLayout({
   const [isDarkTheme, setDarkTheme] = useState<boolean>(false);
 
   const onThemeChange = () => {
+    if (!isDarkTheme) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
     setDarkTheme(!isDarkTheme);
   };
   const onMenuClick = (e: MenuInfo) => {
@@ -120,8 +125,18 @@ export default function RootLayout({
         algorithm: isDarkTheme ? theme.darkAlgorithm : theme.defaultAlgorithm,
       }}
     >
-      <Layout>
-        <Sider trigger={null} collapsible collapsed={collapsed}>
+      <Layout hasSider>
+        <Sider
+          trigger={null}
+          collapsible
+          collapsed={collapsed}
+          className="fixed h-screen overflow-auto"
+          style={{
+            insetInlineStart: 0,
+            scrollbarWidth: "thin",
+            scrollbarColor: "unset",
+          }}
+        >
           <div
             className="h-16 justify-center items-center text-center p-6 cursor-pointer"
             onClick={() => {
