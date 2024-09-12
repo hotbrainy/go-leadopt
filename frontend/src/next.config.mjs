@@ -6,5 +6,4 @@ const nextConfig = {
   },
   output: "standalone",
 };
-console.log(process.env)
 export default nextConfig;

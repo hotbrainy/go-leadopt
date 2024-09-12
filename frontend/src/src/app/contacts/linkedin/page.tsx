@@ -10,7 +10,7 @@ import { DataType } from "@/types";
 
 const { Content } = Layout;
 
-const Home: React.FC = () => {
+const Linkedin: React.FC = () => {
   const [data, setData] = useState([]);
   const columns: TableProps<DataType>["columns"] = [
     {
@@ -42,7 +42,7 @@ const Home: React.FC = () => {
     {
       title: "Action",
       key: "action",
-      render: (_: unknown, record: { first_name: string }) => (
+      render: (_: unknown, record: {first_name:string}) => (
         <Space size="middle">
           <a>Invite {record.first_name}</a>
           <a>Delete</a>
@@ -72,4 +72,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home;
+export default Linkedin;

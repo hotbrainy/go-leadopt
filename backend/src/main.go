@@ -6,6 +6,7 @@ import (
 
 	"github.com/hotbrainy/go-leadopt/backend/controllers"
 	"github.com/hotbrainy/go-leadopt/backend/db"
+	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -15,7 +16,11 @@ func main() {
 	db.Init()
 
 	app := iris.New()
-
+	crs := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+	})
+	app.Use(crs)
 	api := app.Party("/api")
 	api.Use(iris.Compression)
 	{

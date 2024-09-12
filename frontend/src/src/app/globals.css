@@ -25,3 +25,44 @@ body {
     text-wrap: balance;
   }
 }
+
+
+.chat-ui {
+  padding: 20px;
+  background-color: #f5f5f5;
+  font-family: Arial, sans-serif;
+}
+
+.chat-bubble {
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 8px;
+  max-width: 60%;
+  word-break: break-word;
+}
+
+.chat-bubble.assistant {
+  background-color: #e6e6ff;
+  align-self: flex-start;
+}
+
+.chat-bubble.computer {
+  background-color: #ffebcc;
+  align-self: flex-end;
+}
+
+.code-block {
+  font-family: "Courier New", monospace;
+  background-color: #f0f0f0;
+  padding: 5px;
+  display: block;
+  border-left: 4px solid #888;
+  margin: 5px 0;
+}
+
+.console-output {
+  background-color: #333;
+  color: #fff;
+  padding: 5px;
+  margin: 5px 0;
+}

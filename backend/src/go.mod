@@ -3,6 +3,7 @@ module github.com/hotbrainy/go-leadopt/backend
 go 1.22
 
 require (
+	github.com/iris-contrib/middleware/cors v0.0.0-20240502084239-34f27409ce72
 	github.com/kamva/mgm/v3 v3.5.0
 	go.mongodb.org/mongo-driver v1.8.4
 )
