@@ -11,6 +11,7 @@ import {
   theme,
   Flex,
   Dropdown,
+  Affix,
 } from "antd";
 import type { MenuProps } from "antd";
 import { WebSocketProvider } from "next-ws/client";
@@ -126,35 +127,37 @@ export default function RootLayout({
       }}
     >
       <Layout hasSider>
-        <Sider
-          trigger={null}
-          collapsible
-          collapsed={collapsed}
-          className="fixed h-screen overflow-auto"
-          style={{
-            insetInlineStart: 0,
-            scrollbarWidth: "thin",
-            scrollbarColor: "unset",
-          }}
-        >
-          <div
-            className="h-16 justify-center items-center text-center p-6 cursor-pointer"
-            onClick={() => {
-              setSelectedkeys([]);
-              router.push("/");
+        <Affix offsetTop={0}>
+          <Sider
+            trigger={null}
+            collapsible
+            collapsed={collapsed}
+            className="h-screen overflow-auto"
+            style={{
+              insetInlineStart: 0,
+              scrollbarWidth: "thin",
+              scrollbarColor: "unset",
             }}
           >
-            LEAD OPT
-          </div>
-          <Menu
-            theme="dark"
-            mode="inline"
-            defaultSelectedKeys={[]}
-            selectedKeys={selectedkeys}
-            items={sideBarItems}
-            onClick={onMenuClick}
-          />
-        </Sider>
+            <div
+              className="h-16 justify-center items-center text-center p-6 cursor-pointer"
+              onClick={() => {
+                setSelectedkeys([]);
+                router.push("/");
+              }}
+            >
+              {collapsed ? "LO" : "LEAD OPT"}
+            </div>
+            <Menu
+              theme="dark"
+              mode="inline"
+              defaultSelectedKeys={[]}
+              selectedKeys={selectedkeys}
+              items={sideBarItems}
+              onClick={onMenuClick}
+            />
+          </Sider>
+        </Affix>
         <Layout className="min-h-screen">
           <Header
             className="p-0 flex justify-between items-center pr-4"
