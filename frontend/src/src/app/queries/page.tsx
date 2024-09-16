@@ -12,7 +12,7 @@ import {
   Typography,
 } from "antd";
 import { useWebSocket } from "next-ws/client";
-import React, { useEffect, useState } from "react";
+import React, { KeyboardEvent, useEffect, useState } from "react";
 import { SendOutlined, CodeOutlined } from "@ant-design/icons";
 import Markdown from "react-markdown";
 
@@ -110,11 +110,15 @@ const Queries: React.FC = () => {
     const handleClose = () => {
       console.log("WebSocket closed");
     };
-    ws.send(
-      JSON.stringify({
-        auth: "dummy-api-key",
-      })
-    );
+    setTimeout(() => {
+      if (ws?.readyState === WebSocket.OPEN) {
+        ws.send(
+          JSON.stringify({
+            auth: "dummy-api-key",
+          })
+        );
+      }
+    }, 500);
     ws.addEventListener("open", handleOpen);
     ws.addEventListener("message", handleMessage);
     ws.addEventListener("error", handleError);
@@ -181,7 +185,13 @@ const Queries: React.FC = () => {
       console.log("WebSocket is not open. Unable to send message.");
     }
   };
-
+  const handleKeyUp = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    console.log({ e });
+    if (!e.shiftKey) {
+      e.preventDefault();
+      onSend();
+    }
+  };
   const renderContent = () => {
     return mergeMessagesByRole(messages).map((message, index) =>
       message.role == "user" ? (
@@ -245,11 +255,13 @@ const Queries: React.FC = () => {
             value={prompt}
             className="border-none focus:shadow-none"
             onChange={onPromptInput}
+            onPressEnter={handleKeyUp}
           />
           <Flex gap={2}>
             <Tooltip title="Send prompt">
               <Button
                 type="primary"
+                disabled={prompt == ""}
                 loading={loading || serverStatus != "complete"}
                 onClick={onSend}
               >
