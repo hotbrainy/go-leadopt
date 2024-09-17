@@ -1,4 +1,4 @@
-FROM node:latest AS deps
+FROM node:current-alpine AS deps
 # RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json yarn.lock* package-lock.json* ./
@@ -13,7 +13,7 @@ RUN \
 
 # Start (Block 2) Build the Application Stage
 
-FROM node:latest AS builder
+FROM node:current-alpine AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -23,7 +23,7 @@ RUN yarn build
 # End (Block 2)
 
 # Start (Block 3) Create the Application Runner
-FROM node:latest AS runner
+FROM node:current-alpine AS runner
 WORKDIR /app
 
 # Declare the NODE_ENV
