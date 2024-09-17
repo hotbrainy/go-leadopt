@@ -6,6 +6,7 @@ docker rmi $(docker images --format '{{.ID}} {{.Repository}}' |  grep go-leadopt
 
 docker rm $(docker images|  grep go-leadopt | awk '{print $1}')
 
+docker rm $(docker ps -a --format "{{.ID}} {{.Names}}" --filter "status=exited" | awk '{print $1}') -f
 
 minikube service --all
 
