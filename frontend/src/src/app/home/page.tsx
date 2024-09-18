@@ -5,8 +5,11 @@ import {
   Alert,
   Button,
   Flex,
+  Form,
+  FormProps,
   Input,
   Layout,
+  message,
   Row,
   Spin,
   Tooltip,
@@ -41,7 +44,7 @@ interface MessageType {
   format?: string;
 }
 // const ws = new WebSocket("ws://127.0.0.1:8000");
-const Queries: React.FC = () => {
+const Home: React.FC = () => {
   const ws = useWebSocket();
   const mergeMessagesByRole = (data: MessageType[]) => {
     const merged: {
@@ -98,10 +101,17 @@ const Queries: React.FC = () => {
     }
     return merged;
   };
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<any[]>([
+    {
+      role: "assistant",
+      type: "message",
+      content: "Hi, How can I help you, today?",
+    },
+  ]);
+
+  const [form] = Form.useForm();
   const [serverStatus, setServerStatus] = useState<string>("complete");
   const [loading, setLoading] = useState<boolean>(false);
-  const [prompt, setPrompt] = useState<string>("");
   const [showCode, setShowCode] = useState<boolean>(false);
   const [waitingApprove, setWaitingApprove] = useState<boolean>(false);
   useEffect(() => {
@@ -131,10 +141,12 @@ const Queries: React.FC = () => {
     };
 
     const handleError = () => {
+      message.error("WebSocket Error!");
       console.log("WebSocket error");
     };
 
     const handleClose = () => {
+      message.warning("WebSocket Error!");
       console.log("WebSocket closed");
     };
     setTimeout(() => {
@@ -182,10 +194,7 @@ const Queries: React.FC = () => {
     ws?.send(JSON.stringify(endCommandBlock));
     setWaitingApprove(false);
   };
-  const onPromptInput = (v: any) => {
-    setPrompt(v.target.value);
-  };
-  const onSend = () => {
+  const onSend = (prompt: string) => {
     if (ws?.readyState === WebSocket.OPEN) {
       setLoading(true);
       const startBlock: MessageType = {
@@ -208,15 +217,15 @@ const Queries: React.FC = () => {
       ws.send(JSON.stringify(endBlock));
       // setMessage([startBlock, messageBlock, endBlock]);
       setMessages([...messages, startBlock, messageBlock, endBlock]);
-      setPrompt("");
     } else {
       console.log("WebSocket is not open. Unable to send message.");
     }
+    form.resetFields();
   };
   const handleKeyUp = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (!e.shiftKey) {
       e.preventDefault();
-      onSend();
+      form.submit();
     }
   };
   const renderContent = () => {
@@ -233,15 +242,18 @@ const Queries: React.FC = () => {
           ></Alert>
         </Row>
       ) : (
-        <Row key={index} justify="start" className="mt-1 block">
+        <Row
+          key={index}
+          justify="start"
+          className={`mt-1 block ${
+            (message.type === "code" || message.type === "console") && !showCode
+              ? "hidden"
+              : ""
+          }`}
+        >
           <Markdown
             remarkPlugins={[remarkGfm]}
-            className={`prose lg:prose-xl dark:prose-invert ${
-              (message.type === "code" || message.type === "console") &&
-              !showCode
-                ? "hidden"
-                : ""
-            }`}
+            className={`prose lg:prose-xl dark:prose-invert`}
             components={{
               code(props) {
                 const { children, className, ...rest } = props;
@@ -253,7 +265,6 @@ const Queries: React.FC = () => {
                     style={vscDarkPlus}
                     customStyle={{
                       padding: "none !important",
-                      display: showCode ? "inline" : "none",
                     }}
                     showInlineLineNumbers
                     showLineNumbers
@@ -284,12 +295,21 @@ const Queries: React.FC = () => {
       )
     );
   };
+
+  const onFinish: FormProps<any>["onFinish"] = (values) => {
+    onSend(values.prompt);
+  };
+
+  const onFinishFailed: FormProps<any>["onFinishFailed"] = (errorInfo) => {
+    console.log("Failed:", errorInfo);
+  };
+
   return (
     <Content className="relative mt-4 m-2 pb-4 flex flex-col xs:mx-6 sm:mx-6 md:mx-14 gap-4 overflow-auto">
-      <div className="min-h-[calc(100vh-160px)] overflow-auto pb-8">
+      <div className="min-h-[calc(100vh-160px)] overflow-auto">
         {renderContent()}
       </div>
-      <Affix offsetBottom={10} className="bottom-2 absolute w-full">
+      <Affix offsetBottom={0} className="bottom-0 absolute w-full">
         {waitingApprove ? (
           <Alert
             showIcon
@@ -311,43 +331,61 @@ const Queries: React.FC = () => {
             }
           ></Alert>
         ) : null}
-        <Flex className="w-full relative p-1 align-bottom justify-end items-end flex flex-row">
-          <Input.TextArea
-            autoSize
-            placeholder="Ask something to the agent"
-            value={prompt}
-            className="border-none focus:shadow-none"
-            onChange={onPromptInput}
-            onPressEnter={handleKeyUp}
-          />
-          <Flex gap={2}>
-            <Tooltip title="Send prompt">
-              <Button
-                type="primary"
-                disabled={prompt == ""}
-                loading={loading || serverStatus != "complete"}
-                onClick={onSend}
-              >
-                <SendOutlined />
-              </Button>
-            </Tooltip>
-            <Tooltip title="Show Code">
-              <Button
-                type="primary"
-                disabled={
-                  loading ||
-                  (serverStatus !== "complete" &&
-                    serverStatus !== "waiting_approve")
-                }
-                icon={showCode ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-                onClick={() => setShowCode(!showCode)}
-              ></Button>
-            </Tooltip>
+        <Form
+          form={form}
+          name="promptForm"
+          initialValues={{ remember: true }}
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
+          autoComplete="off"
+        >
+          <Flex className="w-full relative align-bottom justify-end items-end flex flex-row">
+            <Form.Item
+              name="prompt"
+              rules={[
+                { required: true /*  message: "Please input your prompt!" */ },
+              ]}
+              className="w-full"
+            >
+              <Input.TextArea
+                autoSize
+                placeholder="Ask something to the agent"
+                className="w-full border-none focus:shadow-none"
+                onPressEnter={handleKeyUp}
+              />
+            </Form.Item>
+            <Flex gap={2}>
+              <Form.Item>
+                <Tooltip title="Send prompt">
+                  <Button
+                    type="primary"
+                    loading={loading || serverStatus != "complete"}
+                    htmlType="submit"
+                  >
+                    <SendOutlined />
+                  </Button>
+                </Tooltip>
+              </Form.Item>
+              <Form.Item>
+                <Tooltip title="Show Code">
+                  <Button
+                    type="primary"
+                    disabled={
+                      loading ||
+                      (serverStatus !== "complete" &&
+                        serverStatus !== "waiting_approve")
+                    }
+                    icon={showCode ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                    onClick={() => setShowCode(!showCode)}
+                  ></Button>
+                </Tooltip>
+              </Form.Item>
+            </Flex>
           </Flex>
-        </Flex>
+        </Form>
       </Affix>
     </Content>
   );
 };
 
-export default Queries;
+export default Home;

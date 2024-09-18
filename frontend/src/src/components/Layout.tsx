@@ -23,28 +23,45 @@ import {
   SunOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  UploadOutlined,
   SettingOutlined,
   UserOutlined,
-  QuestionOutlined,
-  UserSwitchOutlined,
-  RedEnvelopeOutlined,
-  ContactsOutlined,
   LinkedinOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
+
+import {
+  BsRobot,
+  BsSpeedometer2,
+  BsShield,
+  BsPersonLinesFill,
+  BsNewspaper,
+  BsCheck2Square,
+  BsPeopleFill,
+} from "react-icons/bs";
+import Image from "next/image";
+import Logo from "../assets/img/aelogowhite.webp";
 
 const { Header, Sider } = Layout;
 
 const sideBarItems: MenuProps["items"] = [
   {
+    key: "home",
+    icon: <BsRobot />,
+    label: `Home`,
+  },
+  {
     key: "dashboard",
-    icon: <UserOutlined />,
+    icon: <BsSpeedometer2 />,
     label: `Dashboard`,
   },
   {
+    key: "competition",
+    icon: <BsShield />,
+    label: `Competition`,
+  },
+  {
     key: "contacts",
-    icon: <ContactsOutlined />,
+    icon: <BsPersonLinesFill />,
     label: `Contacts`,
     children: [
       { key: "linkedin", icon: <LinkedinOutlined />, label: "Linkedin" },
@@ -52,23 +69,18 @@ const sideBarItems: MenuProps["items"] = [
   },
   {
     key: "news",
-    icon: <RedEnvelopeOutlined />,
+    icon: <BsNewspaper />,
     label: `News`,
   },
   {
+    key: "tasks",
+    icon: <BsCheck2Square />,
+    label: `Tasks`,
+  },
+  {
     key: "leads",
-    icon: <UserSwitchOutlined />,
+    icon: <BsPeopleFill />,
     label: `Leads`,
-  },
-  {
-    key: "competition",
-    icon: <UploadOutlined />,
-    label: `Competition`,
-  },
-  {
-    key: "queries",
-    icon: <QuestionOutlined />,
-    label: `Queries`,
   },
 ];
 
@@ -140,18 +152,18 @@ export default function RootLayout({
             }}
           >
             <div
-              className="h-16 justify-center items-center text-center p-6 cursor-pointer"
+              className="h-16 justify-center items-center text-center p-6 cursor-pointer flex"
               onClick={() => {
                 setSelectedkeys([]);
                 router.push("/");
               }}
             >
-              {collapsed ? "LO" : "LEAD OPT"}
+              <Image src={Logo} alt="L" width={76} height={61} />
             </div>
             <Menu
               theme="dark"
               mode="inline"
-              defaultSelectedKeys={[]}
+              defaultSelectedKeys={["home"]}
               selectedKeys={selectedkeys}
               items={sideBarItems}
               onClick={onMenuClick}

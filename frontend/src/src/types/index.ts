@@ -14,3 +14,4 @@ export interface DataType {
   position: string;
   linkedin_url: string;
 }
+ 
