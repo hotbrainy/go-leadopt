@@ -8,7 +8,6 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { Session } from "@/types";
 import api from "@/api";
 import Link from "next/link";
-import { BiPlus, BiSolidPencil } from "react-icons/bi";
 import { HiOutlinePencilAlt } from "react-icons/hi";
 import ProfileImage from "@/assets/avatars/nic.webp";
 import { useRouter } from "next/navigation";

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { getData } from "@/lib";
 import { useEffect } from "react";
 
 import type { TableProps } from "antd";
