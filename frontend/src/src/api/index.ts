@@ -1,7 +1,10 @@
 "use client";
-
-export const baseURL = `http://${window?.location.hostname}:${process.env.NEXT_PUBLIC_API_PORT}/api/`;
-export const wsURL = `ws://${window?.location.hostname}:${process.env.NEXT_PUBLIC_API_PORT}/`;
+let host = process.env.NEXT_PUBLIC_API_ADDR;
+if (typeof window !== 'undefined') {
+  host  = window?.location.hostname;
+}
+export const baseURL = `http://${host}:${process.env.NEXT_PUBLIC_API_PORT}/api/`;
+export const wsURL = `ws://${host}:${process.env.NEXT_PUBLIC_API_PORT}/`;
 export default function api(url: string, config?: any) {
   return fetch(baseURL + url, {
     ...config,
