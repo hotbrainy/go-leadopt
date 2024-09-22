@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import type { TableProps } from "antd";
 import { Space, Table, Layout } from "antd";
 import { DataType } from "@/types";
+import api from "@/api";
 
 const { Content } = Layout;
 
@@ -42,7 +43,7 @@ const Linkedin: React.FC = () => {
     {
       title: "Action",
       key: "action",
-      render: (_: unknown, record: {first_name:string}) => (
+      render: (_: unknown, record: { first_name: string }) => (
         <Space size="middle">
           <a>Invite {record.first_name}</a>
           <a>Delete</a>
@@ -51,9 +52,8 @@ const Linkedin: React.FC = () => {
     },
   ];
   useEffect(() => {
-    getData().then((res) => {
-      setData(res);
-      console.log(res);
+    api("profile").then((res) => {
+      setData(res.results);
     });
   }, []);
 
@@ -63,8 +63,6 @@ const Linkedin: React.FC = () => {
         margin: "24px 16px",
         padding: 24,
         minHeight: 280,
-        // background: colorBgContainer,
-        // borderRadius: borderRadiusLG,
       }}
     >
       <Table columns={columns} dataSource={data} />

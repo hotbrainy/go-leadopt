@@ -12,10 +12,10 @@ import {
   Flex,
   Dropdown,
   Affix,
+  Drawer,
 } from "antd";
 import type { MenuProps } from "antd";
 import { WebSocketProvider } from "next-ws/client";
-
 import { MenuInfo } from "@/types";
 
 import {
@@ -40,6 +40,10 @@ import {
 } from "react-icons/bs";
 import Image from "next/image";
 import Logo from "../assets/img/aelogowhite.webp";
+import LayoutContext from "@/contexts/LayoutContextProvider";
+import { wsURL } from "@/api";
+ 
+import ProfileImage from "../assets/avatars/nic.webp";
 
 const { Header, Sider } = Layout;
 
@@ -55,17 +59,17 @@ const sideBarItems: MenuProps["items"] = [
     label: `Dashboard`,
   },
   {
-    key: "competition",
-    icon: <BsShield />,
-    label: `Competition`,
-  },
-  {
     key: "contacts",
     icon: <BsPersonLinesFill />,
     label: `Contacts`,
     children: [
       { key: "linkedin", icon: <LinkedinOutlined />, label: "Linkedin" },
     ],
+  },
+  {
+    key: "leads",
+    icon: <BsPeopleFill />,
+    label: `Leads`,
   },
   {
     key: "news",
@@ -78,9 +82,9 @@ const sideBarItems: MenuProps["items"] = [
     label: `Tasks`,
   },
   {
-    key: "leads",
-    icon: <BsPeopleFill />,
-    label: `Leads`,
+    key: "competition",
+    icon: <BsShield />,
+    label: `Competition`,
   },
 ];
 
@@ -113,8 +117,8 @@ export default function RootLayout({
   } = theme.useToken();
 
   const [collapsed, setCollapsed] = useState<boolean>(false);
-  const [selectedkeys, setSelectedkeys] = useState<string[]>([]);
-  const [isDarkTheme, setDarkTheme] = useState<boolean>(false);
+  const [selectedkeys, setSelectedkeys] = useState<string[]>(["home"]);
+  const [isDarkTheme, setDarkTheme] = useState<boolean>(true);
 
   const onThemeChange = () => {
     if (!isDarkTheme) {
@@ -128,6 +132,29 @@ export default function RootLayout({
     setSelectedkeys(e.keyPath);
     router.push("/" + e.keyPath.reverse().join("/"));
   };
+  const renderMenu = () => {
+    return (
+      <>
+        <div
+          className="h-40 justify-center items-center text-center p-6 cursor-pointer flex"
+          onClick={() => {
+            setSelectedkeys(["home"]);
+            router.push("/home");
+          }}
+        >
+          <Image src={Logo} alt="L" width={76} height={61} />
+        </div>
+        <Menu
+          theme="dark"
+          mode="inline"
+          defaultSelectedKeys={["home"]}
+          selectedKeys={selectedkeys}
+          items={sideBarItems}
+          onClick={onMenuClick}
+        />
+      </>
+    );
+  };
   return (
     <ConfigProvider
       theme={{
@@ -138,74 +165,81 @@ export default function RootLayout({
         algorithm: isDarkTheme ? theme.darkAlgorithm : theme.defaultAlgorithm,
       }}
     >
-      <Layout hasSider>
-        <Affix offsetTop={0}>
-          <Sider
-            trigger={null}
-            collapsible
-            collapsed={collapsed}
-            className="h-screen overflow-auto"
-            style={{
-              insetInlineStart: 0,
-              scrollbarWidth: "thin",
-              scrollbarColor: "unset",
-            }}
-          >
-            <div
-              className="h-16 justify-center items-center text-center p-6 cursor-pointer flex"
-              onClick={() => {
-                setSelectedkeys([]);
-                router.push("/");
-              }}
-            >
-              <Image src={Logo} alt="L" width={76} height={61} />
-            </div>
-            <Menu
-              theme="dark"
-              mode="inline"
-              defaultSelectedKeys={["home"]}
-              selectedKeys={selectedkeys}
-              items={sideBarItems}
-              onClick={onMenuClick}
-            />
-          </Sider>
-        </Affix>
-        <Layout className="min-h-screen">
-          <Header
-            className="p-0 flex justify-between items-center pr-4"
-            style={{ background: isDarkTheme ? "" : colorBgContainer }}
-          >
-            <Button
-              type="text"
-              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              onClick={() => setCollapsed(!collapsed)}
-              className="!w-16 h-16 text-base"
-            />
-            <Flex
-              align="flex-end"
-              justify="space-between"
-              className="gap-2 items-center"
-            >
-              <Button
-                type="text"
-                icon={isDarkTheme ? <SunOutlined /> : <MoonOutlined />}
-                onClick={onThemeChange}
-                className="!w-16 h-16 text-base"
-              />
-              <Dropdown
-                menu={{ items: profileItems }}
-                placement="bottomRight"
-                trigger={["click"]}
+      <LayoutContext.Provider value={{ collapsed, setCollapsed }}>
+        <WebSocketProvider url={wsURL}>
+          <Layout hasSider>
+            <Affix offsetTop={0}>
+              <aside>
+                <Drawer
+                  title=""
+                  placement={"left"}
+                  closable={false}
+                  onClose={() => setCollapsed(false)}
+                  open={collapsed}
+                  key={"left"}
+                  size="default"
+                  rootClassName="xs:inline-block md:hidden"
+                  classNames={{
+                    content: "p-0 !bg-[#001529]",
+                    body: "!p-0",
+                  }}
+                  onClick={() => setCollapsed(false)}
+                >
+                  {renderMenu()}
+                </Drawer>
+                <Sider
+                  trigger={null}
+                  // collapsible
+                  collapsed={collapsed}
+                  className="h-screen overflow-auto hidden md:inline-block"
+                  style={{
+                    insetInlineStart: 0,
+                    scrollbarWidth: "thin",
+                    scrollbarColor: "unset",
+                  }}
+                >
+                  {renderMenu()}
+                </Sider>
+              </aside>
+            </Affix>
+            <Layout className="min-h-screen">
+              <Header
+                className="p-0 flex justify-between items-center pr-4"
+                style={{ background: isDarkTheme ? "" : colorBgContainer }}
               >
-                <Avatar icon={<UserOutlined />} className="w-12 h-12" />
-              </Dropdown>
-            </Flex>
-          </Header>
-          <WebSocketProvider url="ws://localhost:8000/">
-            {children}
-          </WebSocketProvider>
-        </Layout>
-      </Layout>
+                <Button
+                  type="text"
+                  icon={
+                    collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />
+                  }
+                  onClick={() => setCollapsed(!collapsed)}
+                  className="!w-16 h-16 text-base invisible"
+                />
+                <Flex
+                  align="flex-end"
+                  justify="space-between"
+                  className="gap-2 items-center"
+                >
+                  <Button
+                    type="text"
+                    icon={isDarkTheme ? <SunOutlined /> : <MoonOutlined />}
+                    onClick={onThemeChange}
+                    className="!w-16 h-16 text-base invisible"
+                  />
+                  <Dropdown
+                    menu={{ items: profileItems }}
+                    placement="bottomRight"
+                    trigger={["click"]}
+                  >
+                    <Avatar src={<Image src={ProfileImage} alt=""/>} className="w-12 h-12" />
+                  </Dropdown>
+                </Flex>
+              </Header>
+              {children}
+            </Layout>
+          </Layout>
+        </WebSocketProvider>
+      </LayoutContext.Provider>
     </ConfigProvider>
   );
 }

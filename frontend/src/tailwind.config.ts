@@ -1,4 +1,4 @@
-import type { Config } from "tailwindcss"; 
+import type { Config } from "tailwindcss";
 const config: Config = {
   darkMode: "class",
   content: [
@@ -15,6 +15,18 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      typography: () => ({
+        DEFAULT: {
+          css: {
+            pre: {
+              padding: "0 !important",
+              margin: "0 !important",
+
+            },
+            maxWidth: '105ch'
+          },
+        },
+      }),
     },
   },
   plugins: [require("@tailwindcss/typography")],

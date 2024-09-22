@@ -14,4 +14,11 @@ export interface DataType {
   position: string;
   linkedin_url: string;
 }
- 
+
+export interface Session {
+  id: number;
+  session_id: string;
+  title?: string;
+  created_at?: string;
+  user: string;
+}
