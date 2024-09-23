@@ -10,10 +10,6 @@ build:
       dockerfile: Dockerfile
   - image: go-leadopt-frontend
     context: frontend/src
-    sync:
-      manual:
-      - src: 'frontend/src/src/*'
-        dest: .
     docker:
       dockerfile: Dockerfile
 manifests:
@@ -29,15 +25,15 @@ manifests:
       version: 0.1.0
 
 profiles:
-  - name: mix-deploy
-    patches:
-     - op: remove
-       path: /manifests/helm
-    deploy:
-      helm:
-        releases:
-        - name: backend
-          chartPath: backend
-          valuesFiles:
-          - backend/values.yaml
-          version: 0.1.0
+- name: mix-deploy
+  patches:
+  - op: remove
+    path: /manifests/helm
+  deploy:
+    helm:
+      releases:
+      - name: backend
+        chartPath: backend
+        valuesFiles:
+        - backend/values.yaml
+        version: 0.1.0
