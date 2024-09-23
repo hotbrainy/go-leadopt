@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "lead-optimizer"
+version = "0.1.0"
+description = ""
+authors = ["hotbrainy"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4"
+open-interpreter = {extras = ["server"], version = "^0.3.13"}
+django = "^5.1.1"
+websockets = "^13.0.1"
+djangorestframework = "^3.15.2"
+django-filter = "^24.3"
+markdown = "^3.7"
+daphne = "^4.1.2"
+channels = "^4.1.0"
+asyncio = "^3.4.3"
+djangorestframework-simplejwt = "^5.3.1"
+django-cors-headers = "^4.4.0"
+drf-nested-routers = "^0.94.1"
+psycopg2-binary = "^2.9.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

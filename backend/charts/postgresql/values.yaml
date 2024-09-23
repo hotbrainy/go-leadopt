@@ -1,0 +1,7 @@
+postgresql:
+  username: "postgres"
+  password: "postgres"
+  dbname: "leadopt"
+  replicaCount: 1
+  service:
+    port: "5432"

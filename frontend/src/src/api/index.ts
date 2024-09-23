@@ -1,4 +1,7 @@
 "use client";
+console.log(process.env)
+
+
 let host = process.env.NEXT_PUBLIC_API_ADDR;
 if (typeof window !== 'undefined') {
   host  = window?.location.hostname;

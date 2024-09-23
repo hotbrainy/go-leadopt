@@ -1,0 +1,41 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}
+    tier: db
+spec:
+  replicas: {{ .Values.postgresql.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      tier: db
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        tier: db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:{{ .Chart.AppVersion }}
+          ports:
+            - containerPort: {{ .Values.postgresql.service.port }}          
+          env:
+            - name: POSTGRES_USER
+              value: {{ .Values.postgresql.username }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgresql.password }}
+            - name: POSTGRES_NAME
+              value: {{ .Values.postgresql.dbname }}
+            - name: POSTGRES_PORT
+              value: '{{ .Values.postgresql.service.port }}'
+          volumeMounts:
+            - name: {{ .Chart.Name }}-volume-mount
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: {{ .Chart.Name }}-volume-mount
+          persistentVolumeClaim:
+            claimName: {{ .Chart.Name }}-pvc
+      restartPolicy: Always

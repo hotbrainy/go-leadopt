@@ -1,0 +1,15 @@
+django:
+  image: leadopt-optimizer-backend
+  replicaCount: 1
+  service:
+    port: 8000
+    nodePort: 30000
+  env:
+    OPENAI_API_KEY: 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
+    DJANGO_DB_NAME: "leadopt"
+    DJANGO_DB_USER: "postgres"
+    DJANGO_DB_PASSWORD: "postgres"
+    DJANGO_DB_HOST: "lead-optimizer-postgresql"
+    DJANGO_DB_PORT: "5432"
+    DJANGO_MONGO_HOST: "lead-optimizer-mongo"
+    DJANGO_MONGO_PORT: "27017"

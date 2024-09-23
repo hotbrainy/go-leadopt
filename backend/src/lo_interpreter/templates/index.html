@@ -1,0 +1,53 @@
+<!-- templates/websocket_test.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebSocket Test</title>
+  </head>
+  <body>
+    <h1>WebSocket Test</h1>
+    <textarea id="text"></textarea>
+    <button id="sendBtn">Send Message</button>
+    <div id="messages"></div>
+
+    <script>
+      const ws = new WebSocket('ws://' + window.location.host + '/')
+      
+      ws.onopen = function () {
+        console.log('WebSocket connection opened')
+      }
+      
+      ws.onmessage = function (event) {
+        const messagesDiv = document.getElementById('messages')
+        const newMessage = document.createElement('span')
+        const data = JSON.parse(event.data)
+        console.log(data, new Date().getTime())
+        newMessage.textContent = data.content
+        if (data.end) {
+          messagesDiv.appendChild(document.createElement('br'))
+        } else {
+          messagesDiv.appendChild(newMessage)
+        }
+      }
+      
+      ws.onclose = function () {
+        console.log('WebSocket connection closed')
+      }
+      
+      document.getElementById('sendBtn').onclick = function () {
+        let txt= document.querySelector('#text').value;
+        if (txt.length){
+          try {
+            JSON.parse(txt)
+            ws.send(txt)
+          }catch(e){
+            let data = JSON.stringify({ message: txt })
+            ws.send(data)
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

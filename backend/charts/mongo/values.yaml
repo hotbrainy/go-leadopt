@@ -1,0 +1,6 @@
+mongodb:
+  username: ""
+  password: ""
+  replicaCount: 1
+  service:
+    port: "27017"

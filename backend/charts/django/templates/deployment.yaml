@@ -1,0 +1,43 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  replicas: {{ .Values.django.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: {{ .Values.django.image }}
+        ports:
+          - name: http-server
+            containerPort: {{ .Values.django.service.port }}
+          # - name: debug
+          #  containerPort: {{ .Values.django.service.nodePort }}
+        env:
+          - name: DJANGO_DB_NAME
+            value: {{ .Values.django.env.DJANGO_DB_NAME }}
+          - name: DJANGO_DB_USER
+            value: {{ .Values.django.env.DJANGO_DB_USER }}
+          - name: DJANGO_DB_PASSWORD
+            value: {{ .Values.django.env.DJANGO_DB_PASSWORD }}
+          - name: DJANGO_DB_HOST
+            value: {{ .Values.django.env.DJANGO_DB_HOST }}
+          - name: DJANGO_DB_PORT
+            value: '{{ .Values.django.env.DJANGO_DB_PORT }}'
+          - name: DJANGO_MONGO_HOST
+            value: {{ .Values.django.env.DJANGO_MONGO_HOST }}
+          - name: DJANGO_MONGO_PORT
+            value: '{{ .Values.django.env.DJANGO_MONGO_PORT }}'
+          - name: OPENAI_API_KEY
+            value: {{ .Values.django.env.OPENAI_API_KEY }}

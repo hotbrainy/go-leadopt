@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: go-leadopt-frontend
+  name: leadopt-optimizer-frontend
   labels:
     app: frontend
 spec:
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: go-leadopt-frontend
+        image: leadopt-optimizer-frontend
         ports:
         - name: http-server
           containerPort: 8080
@@ -26,4 +26,4 @@ spec:
         - name: PORT
           value: "8080"
         - name: LEADOPT_API_ADDR
-          value: go-leadopt-backend:8081
+          value: leadopt-optimizer-backend:8000

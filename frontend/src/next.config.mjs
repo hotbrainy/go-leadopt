@@ -7,4 +7,5 @@ const nextConfig = {
   },
   output: "standalone",
 };
+console.log(nextConfig)
 export default nextConfig;

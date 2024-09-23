@@ -1,14 +1,14 @@
 apiVersion: skaffold/v4beta11
 kind: Config
 metadata:
-  name: go-leadopt
+  name: leadopt-optimizer
 build:
   artifacts:
-  - image: go-leadopt-backend
+  - image: leadopt-optimizer-backend
     context: backend/src
     docker:
       dockerfile: Dockerfile
-  - image: go-leadopt-frontend
+  - image: leadopt-optimizer-frontend
     context: frontend/src
     sync:
       manual:
@@ -22,22 +22,47 @@ manifests:
   # - backend/templates/*.yaml
   helm:
     releases:
-    - name: backend
-      chartPath: backend
+    - name: mongo
+      chartPath: backend/charts/mongo
       valuesFiles:
-      - backend/values.yaml
-      version: 0.1.0
-
+      - backend/charts/mongo/values.yaml
+      wait: true
+    - name: postgresql
+      chartPath: backend/charts/postgresql
+      wait: true
+      valuesFiles:
+      - backend/charts/postgresql/values.yaml
+    - name: django
+      chartPath: backend/charts/django
+      wait: true
+      valuesFiles:
+      - backend/charts/django/values.yaml
+      # dependsOn:
+      # - name: mongodb
+      # - name: postgresql
 profiles:
-  - name: mix-deploy
-    patches:
-     - op: remove
-       path: /manifests/helm
-    deploy:
-      helm:
-        releases:
-        - name: backend
-          chartPath: backend
-          valuesFiles:
-          - backend/values.yaml
-          version: 0.1.0
+- name: mix-deploy
+  patches:
+  - op: remove
+    path: /manifests/helm
+  deploy:
+    helm:
+      releases:
+      - name: mongo
+        chartPath: backend/charts/mongo
+        valuesFiles:
+        - backend/charts/mongo/values.yaml
+        wait: true
+      - name: postgresql
+        chartPath: backend/charts/postgresql
+        valuesFiles:
+        - backend/charts/postgresql/values.yaml
+        wait: true
+      - name: django
+        chartPath: backend/charts/django
+        valuesFiles:
+        - backend/charts/django/values.yaml
+        wait: true
+        # dependsOn:
+        # - name: mongodb
+        # - name: postgresql
