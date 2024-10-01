@@ -15,7 +15,13 @@ import {
   FloatButton,
 } from "antd";
 import { useWebSocket } from "next-ws/client";
-import React, { KeyboardEvent, useContext, useEffect, useState } from "react";
+import React, {
+  KeyboardEvent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   SendOutlined,
@@ -28,7 +34,7 @@ import remarkGfm from "remark-gfm";
 
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { BiArrowBack } from "react-icons/bi";
+import { BiArrowBack, BiArrowToBottom } from "react-icons/bi";
 import { useRouter } from "next/navigation";
 
 import api from "@/api";
@@ -58,6 +64,7 @@ const Message: React.FC = (props: any) => {
   }
 
   const { collapsed } = layoutContext;
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
 
   const [form] = Form.useForm();
@@ -220,14 +227,14 @@ const Message: React.FC = (props: any) => {
                         {String(children).replace(/\n$/, "")}
                       </SyntaxHighlighter>
                     ) : (
-                      <code
-                        {...rest}
-                        className={`${className}`}
-                      >
+                      <code {...rest} className={`${className}`}>
                         {children}
                       </code>
                     );
                   },
+                  a(props) {
+                    return <a {...props} target="_blank" rel="noreferrer" />;
+                  }
                 }}
               >
                 {message.content &&
@@ -247,6 +254,12 @@ const Message: React.FC = (props: any) => {
       : null;
   };
 
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current?.scrollIntoView();
+    }
+  };
+
   const onFinish: FormProps<any>["onFinish"] = (values) => {
     onSend(values.prompt);
   };
@@ -257,6 +270,18 @@ const Message: React.FC = (props: any) => {
 
   const onBack = () => {
     router.push("/home");
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const bottom =
+      Math.floor(e.currentTarget.scrollHeight - e.currentTarget.scrollTop) <=
+      e.currentTarget.clientHeight + 1;
+    console.log(
+      e.currentTarget.scrollHeight,
+      e.currentTarget.scrollTop,
+      e.currentTarget.clientHeight
+    );
+    setIsAtBottom(bottom);
   };
   useEffect(() => {
     if (!ws) return;
@@ -286,10 +311,10 @@ const Message: React.FC = (props: any) => {
           })
         );
       }
-      if(data?.payload?.end){
+      if (data?.payload?.end) {
         setLoading(false);
       }
-      if(data?.payload?.start){
+      if (data?.payload?.start) {
         setLoading(true);
       }
       if (data.type == "interpreter" && data.action == "chat") {
@@ -299,6 +324,7 @@ const Message: React.FC = (props: any) => {
 
         setMessages((mm) => [...mm, data.payload]);
       }
+      scrollToBottom();
     };
 
     const handleError = (err: Event) => {
@@ -342,7 +368,10 @@ const Message: React.FC = (props: any) => {
     setIsAtBottom(false);
   }, [props.params.id]);
   return (
-    <Content className="relative mt-2 max-h-[calc(100vh-130px)]  flex flex-col gap-4 overflow-auto ">
+    <Content
+      className="relative mt-2 max-h-[calc(100vh-130px)]  flex flex-col gap-4 overflow-auto "
+      onScroll={handleScroll}
+    >
       <FloatButton
         className={`fixed top-[80px] ${
           collapsed
@@ -364,15 +393,15 @@ const Message: React.FC = (props: any) => {
         className="px-4 md:px-10"
       > */}
         {renderContent()}
-        <div className="w-full h-20"></div>
-        {isAtBottom && (
+        <div className="w-full h-20" ref={messagesEndRef}></div>
+        {!isAtBottom && (
           <FloatButton
             className={`bottom-16 fixed ${
               collapsed ? "left-[calc(50%+40px)]" : "left-[calc(50%+100px)]"
             }`}
-          >
-            New chat
-          </FloatButton>
+            icon={<BiArrowToBottom />}
+            onClick={scrollToBottom}
+          ></FloatButton>
         )}
         {/* </Scrollbar> */}
       </div>

@@ -169,7 +169,7 @@ export default function RootLayout({
         <WebSocketProvider url={wsURL}>
           <Layout hasSider>
             <Affix offsetTop={0}>
-              <aside>
+              <>
                 <Drawer
                   title=""
                   placement={"left"}
@@ -200,7 +200,7 @@ export default function RootLayout({
                 >
                   {renderMenu()}
                 </Sider>
-              </aside>
+              </>
             </Affix>
             <Layout className="min-h-screen">
               <Header

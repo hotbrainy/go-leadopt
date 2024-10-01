@@ -26,4 +26,4 @@ spec:
         - name: PORT
           value: "8080"
         - name: LEADOPT_API_ADDR
-          value: leadopt-optimizer-backend:8000
+          value: leadopt-optimizer-backend:30000

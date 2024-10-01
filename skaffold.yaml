@@ -15,7 +15,7 @@ build:
       - src: 'frontend/src/src/*'
         dest: .
     docker:
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
 manifests:
   rawYaml:
   - frontend/k8s/*.yaml

@@ -8,18 +8,18 @@ from django.contrib.auth.models import Group #, User
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import permissions, viewsets
 
-from .models import Profile
+from .models import LinkedIn
 
-from lo_profile.serializers import ProfileSerializer
+from lo_profile.serializers import LinkedInSerializer
 
 User = get_user_model()
  
 
-class ProfileViewSet(viewsets.ModelViewSet):
+class LinkedInViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
-    queryset = Profile.objects.all().order_by('user')
-    serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    queryset = LinkedIn.objects.all()
+    serializer_class = LinkedInSerializer
+    # permission_classes = [permissions.IsAuthenticated]
     

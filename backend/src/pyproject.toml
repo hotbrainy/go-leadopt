@@ -20,6 +20,8 @@ djangorestframework-simplejwt = "^5.3.1"
 django-cors-headers = "^4.4.0"
 drf-nested-routers = "^0.94.1"
 psycopg2-binary = "^2.9.9"
+channels-redis = "^4.2.0"
+pytz = "^2024.2"
 
 
 [build-system]

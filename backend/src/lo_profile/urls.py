@@ -6,7 +6,7 @@ from . import views
 # Create a router and register our ViewSets with it.
 router = DefaultRouter()
  
-router.register("", views.ProfileViewSet)
+router.register("linkedin", views.LinkedInViewSet)
 
 
 urlpatterns = [                

@@ -137,7 +137,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'main.wsgi.application'
 ASGI_APPLICATION = 'main.asgi.application'
-
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],  # Your Redis server address
+        },
+    },
+}
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -150,7 +157,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         'NAME': os.getenv('DJANGO_DB_NAME', 'leadopt'),
         'USER': os.getenv('DJANGO_DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DJANGO_DB_PASSWORD', 'postgres'),
+        'PASSWORD': os.getenv('DJANGO_DB_PASSWORD', 'root'),
         'HOST': os.getenv('DJANGO_DB_HOST', 'localhost'),
         'PORT': os.getenv('DJANGO_DB_PORT', '5432'),
         # "OPTIONS": {
@@ -201,6 +208,7 @@ STATIC_URL = '/static/'
 
 
 # Directories where Django will look for additional static files
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [
     BASE_DIR / "static",  # For global static files
 ]
