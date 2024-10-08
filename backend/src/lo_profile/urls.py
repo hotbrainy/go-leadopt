@@ -7,6 +7,7 @@ from . import views
 router = DefaultRouter()
  
 router.register("linkedin", views.LinkedInViewSet)
+router.register("contact", views.ContactViewSet)
 
 
 urlpatterns = [                

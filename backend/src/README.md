@@ -62,3 +62,6 @@ Bypass password validation and create user anyway? [y/N]: Y
 Superuser created successfully.
 
 ```
+RUN Redis
+docker pull redis
+docker run -d -p 6379:6379 -v redis-data:/data redis

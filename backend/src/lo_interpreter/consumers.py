@@ -7,15 +7,12 @@ import uuid
 import os
 import pytz
 from django.contrib.auth import get_user_model
-from django.conf import settings
-from django.utils import timezone
+from django.conf import settings 
 
 from asgiref.sync import sync_to_async
 
-from channels.db import database_sync_to_async
-from channels.generic.websocket import WebsocketConsumer
-from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.consumer import AsyncConsumer
+from channels.db import database_sync_to_async 
+from channels.generic.websocket import AsyncWebsocketConsumer 
 
 # from rest_framework.renderers import JSONRenderer
 # from rest_framework.parsers import JSONParser
@@ -24,8 +21,8 @@ from interpreter import OpenInterpreter, AsyncInterpreter
 
 from . import models
 from .serializers import ChatSerializer, MessageSerializer, SessionSerializer
-from lo_profile.models import LinkedIn
-from lo_profile.serializers import LinkedInSerializer
+from lo_profile.models import LinkedIn, Contact
+from lo_profile.serializers import LinkedInSerializer, ContactSerializer
 
 User = get_user_model()
 agents = {}
@@ -114,62 +111,69 @@ class Consumer(AsyncWebsocketConsumer):
                         password: root
                         database: leadopt
                         prefix: lo_
+                        When you connect to the database, please don't show the credentials in the chat. And don't store the credentials in the chat.
+                        And don't forget to close the connection after you finish your work.
                         In the database which you will connect to automatically, the list called `lo_profile_contact` is composed of contacts and leads. if asked for contacts and leads you will assume `lo_profile_contact` is where they are stored. the database is made up of people at construction companies. where as an an example the materials column lists the materials used, you will have an in-depth understanding of services that they will require to complete their development. 
                         At the start, get all data from the database - you need to connect to database in the background and get all data from the collection `lo_profile_contact`.
-                        All field names are in uppercase. So if you are asked for a field name, you will assume it is in uppercase. For example, if you are asked for the first name, you will assume it is `FIRST_NAME`.
+                        All field names are in lowercase. 
                         Here’s a simplified breakdown of the fields, assuming they're for managing construction projects:
 
-                            PROJECTID: Unique identifier for the project.
-                            HEADING: Short title or description of the project.
-                            PROJECT_NAME: The full name of the project.
-                            ADDRESSLINE1, ADDRESSLINE2, ADDRESSLINE3: Lines for the project’s address, broken down for detailed formatting.
-                            TOWN, BOROUGH, COUNTY: The town, borough, and county where the project is located.
-                            POSTCODE: Postal code of the project site.
-                            GOV_REGION: Government region where the project is located.
-                            VALUE: The monetary value of the project.
-                            VALUETYPE: Type of value (e.g., estimated, contract value).
-                            PLANNINGSTAGE: Current stage in the planning process.
-                            CONTRACTSTAGE: Current stage in the contracting process.
-                            STARTDATE, STARTDATETYPE: Project start date and type (e.g., estimated or confirmed).
-                            ENDDATE, ENDDATETYPE: Project end date and type (e.g., estimated or confirmed).
-                            CONTRACTPERIOD: Duration of the contract (e.g., in months).
-                            DEV_TYPE: Type of development (e.g., residential, commercial).
-                            PROJECT_SIZE: The size of the project (could refer to cost, scale, or area).
-                            PROJECTSTATUS: Current status (e.g., in progress, completed).
-                            SITE_AREA: Total area of the project site.
-                            FLOORAREA: Total floor area being constructed.
-                            UNITS: Number of units (e.g., apartments).
-                            STOREYS: Number of storeys/floors in the project.
-                            PRIMARYSECTORS: The main sectors involved (e.g., housing, infrastructure).
-                            PRIMARYCATEGORY: Main category of the project (e.g., construction, refurbishment).
-                            SECTOR_GROUP: Group to which the sector belongs (e.g., private or public).
-                            MATERIALS: Key materials used in the project (e.g., concrete, steel).
-                            LATESTINFORMATION: The most recent updates or changes in the project.
-                            SCHEMEDESCRIPTION: Detailed description of the project plan or scheme.
-                            LEADPLANNINGAPPLICATIONNUMBER: Reference number for the main planning application.
-                            LEAD_APPLICATION_SUBMITTED_DATE: Date the lead planning application was submitted.
-                            LEAD_APPLICATION_DECISION_DATE: Date a decision was made on the application.
-                            DECISION: Outcome of the planning application (e.g., approved, rejected).
-                            COUNCILNAME: Name of the council responsible for the project.
-                            RECORD_TYPE: Type of record (e.g., planning, construction).
-                            ROLE_NAME: The role of the contact person (e.g., architect, project manager).
-                            SALUTATION, FIRST_NAME, LAST_NAME: Contact person’s title (e.g., Mr., Ms.), first and last name.
-                            HAS_LINKEDIN_URL: Indicates whether the contact has a LinkedIn profile (True/False).
-                            LINKEDIN_URL: The LinkedIn profile URL of the contact.
-                            JOB_TITLE: Job title of the contact.
-                            PHONE: Contact’s office phone number.
-                            MOBILE: Contact’s mobile phone number.
-                            PERSONALEMAIL: Contact’s personal email.
-                            LAST_CHECKED_DATE: Last date the contact information was updated.
-                            OFFICE_NAME: Name of the office responsible for the project.
-                            OFFICE_ID: Unique identifier for the office.
-                            ADDR_1, ADDR_2, ADDR_3: Address lines for the office.
-                            TOWN_NAME, COUNTY_NAME, POST_CD: Town, county, and postal code for the office.
-                            OFF_GOV_REGION: Government region where the office is located.
-                            SHOULD_UPDATE: Indicates whether the contact information needs to be updated by harvester.(True/False)
+                            projectid: Unique identifier for the project.
+                            heading: Short title or description of the project.
+                            project_name: The full name of the project.
+                            addressline1, addressline2, addressline3: Lines for the project’s address, broken down for detailed formatting.
+                            town, borough, county: The town, borough, and county where the project is located.
+                            postcode: Postal code of the project site.
+                            gov_region: Government region where the project is located.
+                            value: The monetary value of the project.
+                            valuetype: Type of value (e.g., estimated, contract value).
+                            planningstage: Current stage in the planning process.
+                            contractstage: Current stage in the contracting process.
+                            startdate, startdatetype: Project start date and type (e.g., estimated or confirmed).
+                            enddate, enddatetype: Project end date and type (e.g., estimated or confirmed).
+                            contractperiod: Duration of the contract (e.g., in months).
+                            dev_type: Type of development (e.g., residential, commercial).
+                            project_size: The size of the project (could refer to cost, scale, or area).
+                            projectstatus: Current status (e.g., in progress, completed).
+                            site_area: Total area of the project site.
+                            floorarea: Total floor area being constructed.
+                            units: Number of units (e.g., apartments).
+                            storeys: Number of storeys/floors in the project.
+                            primarysectors: The main sectors involved (e.g., housing, infrastructure).
+                            primarycategory: Main category of the project (e.g., construction, refurbishment).
+                            sector_group: Group to which the sector belongs (e.g., private or public).
+                            materials: Key materials used in the project (e.g., concrete, steel).
+                            latestinformation: The most recent updates or changes in the project.
+                            schemedescription: Detailed description of the project plan or scheme.
+                            leadplanningapplicationnumber: Reference number for the main planning application.
+                            lead_application_submitted_date: Date the lead planning application was submitted.
+                            lead_application_decision_date: Date a decision was made on the application.
+                            decision: Outcome of the planning application (e.g., approved, rejected).
+                            councilname: Name of the council responsible for the project.
+                            record_type: Type of record (e.g., planning, construction).
+                            role_name: The role of the contact person (e.g., architect, project manager).
+                            salutation, first_name, last_name: Contact person’s title (e.g., Mr., Ms.), first and last name.
+                            has_linkedin_url: Indicates whether the contact has a LinkedIn profile (True/False).
+                            linkedin_url: The LinkedIn profile URL of the contact.
+                            job_title: Job title of the contact.
+                            phone: Contact’s office phone number.
+                            mobile: Contact’s mobile phone number.
+                            personalemail: Contact’s personal email.
+                            last_checked_date: Last date the contact information was updated.
+                            office_name: Name of the office responsible for the project.
+                            office_id: Unique identifier for the office.
+                            addr_1, addr_2, addr_3: Address lines for the office.
+                            town_name, county_name, post_cd: Town, county, and postal code for the office.
+                            off_gov_region: Government region where the office is located.
+                            should_update: Indicates whether the contact information needs to be updated by harvester.(True/False)
                         # STYLE
                         All answers will be given in as few words as possible. don't say "i'll update the code" or "i'll write a function" - just do it.
                         I need the very precise and concise answer as less as possible.
+                        Don't use any greetings or sign-offs.
+                        Don't describe any steps or processes.
+                        Don't explain any code or concepts.
+                        Just do the task as quickly as possible.
+                        And return the answer in the simplest form.
                         The simpler, the better. Ideal answer is only one word. This is very important.
                         don't send any answers as a code block or report on the code you are executing.
                         No formalities, no boiler plates, use as few words as possible to give the answer only - focus on sales, efficiency and making money.
@@ -182,15 +186,21 @@ class Consumer(AsyncWebsocketConsumer):
                         You have to save the data to the `{self.user_folder}` folder and provide the link.
                         `{self.user_folder} `is static folder in the project root.
                         when you generate the link, the link should be in the format of `/static/{self.user.username}/result_{self.user.username}_dateme.csv`. The links should be full url. host name is localhost and port is 8000. 
-                       
+                        
 
                         # DATA
                         When searching data, ignore the case.
                         When provided with part of the data e.g. name and company, you will add this and leave the other fields blank.
                         The name would be full name, so interpet this as first name and last name. The company name might not the full name of the company (e.g. SEGRO = SEGRO Plc; words such as UK Ltd should be ignored.)
                         If you add a new contact, harvester chrome extension will be used to get the data.
+                        If you are asked to ask harvester to update the data, you will update the field 'should_update' with boolean value True.
+                        If you are asked to update contact data you automatically know that you just update the field 'should_update' with boolean value True.
+                        e.g. with linkedin, you are not capable of updating information using linkedin, you can update the field 'should_update' with boolean value True and this will send you the data to update the database. it is very important you do not try and access linkedin to update the data and instead just update the field 'should_update' with boolean value True. You will report "I've asked Harvester to update the data".
                         if you are asked to the data again, you need to re run the query to get the updated data.
-                        If you are asked to update the data with harvester, you have to update the field 'SHOULD_UPDATE' with boolean value True. The harverster chrome extension will retrieve the data which the 'SHOULD_UPDATE' is True and update the database.                         
+                        
+                        # TASK
+                        Add mentioned “Names” + “LinkedinUrls” (e.g. Andrew Ward > href=andrew ward’s linkedinurl)
+                        Format activities by each post subheading: Lots of columns - value/category/start date/schedule update etc.                 
                         """
                         # print(self.interpreter.custom_instructions)
                         # print(f"chat - {data}")
@@ -333,7 +343,7 @@ class Consumer(AsyncWebsocketConsumer):
     async def send_message(self, event):
         message = event['message']
         print(f"send_message - {message}")
-        profiles = await self.get_new_profile()
+        profiles = await self.get_should_be_updated_contact()
         # Send the message to the WebSocket client
         print(profiles)
         await self.send(text_data=json.dumps({
@@ -351,19 +361,11 @@ class Consumer(AsyncWebsocketConsumer):
         return user_dir
     
     @database_sync_to_async
-    def get_new_profile(self):
-         
-        ld_tz = pytz.timezone('Europe/London')
-
-        # Get the current time in the specified timezone
-        now = timezone.now().astimezone(ld_tz)
-
-
-        # Define the time range (last 24 hours)
-        time_threshold_london = now - timedelta(hours=2)
-        time_threshold_utc = time_threshold_london.astimezone(pytz.utc)
-        profiles = LinkedIn.objects.filter(url__isnull=True, last_updated__gte=time_threshold_utc)
-        data = LinkedInSerializer(profiles, many=True).data
+    def get_should_be_updated_contact(self):
+          
+ 
+        contacts = Contact.objects.filter(should_update=True)
+        data = ContactSerializer(contacts, many=True).data
         print(data)
         return data
     
