@@ -23,7 +23,7 @@ const config: Config = {
               margin: "0 !important",
 
             },
-            maxWidth: '105ch'
+            maxWidth: '115ch'
           },
         },
       }),
