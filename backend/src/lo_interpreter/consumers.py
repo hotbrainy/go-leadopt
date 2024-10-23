@@ -374,9 +374,9 @@ class Consumer(AsyncWebsocketConsumer):
         # print(f"chat - {chat}")
         summarizer = OpenInterpreter()
         message = summarizer.chat(f"""Give me a short title for summarizing this chat in plain text format, not in markdown, not contain database name or type or collection name.
-                              {chat}
-                              {msgs}
-                              """, display=False) 
+        {chat}
+        {msgs}
+        """, display=False) 
         del summarizer
         session_serializer = SessionSerializer(self.session, data={"title":message[0]["content"]}, partial=True)
         if session_serializer.is_valid():

@@ -25,9 +25,9 @@ class LinkedIn(models.Model):
 
 class Contact(models.Model):    
     id = models.AutoField(primary_key=True)
-    projectid = models.CharField(max_length=255)
-    heading = models.CharField(max_length=255)
-    project_name = models.CharField(max_length=255)
+    projectid = models.CharField(max_length=255,  blank=True, null=True)
+    heading = models.CharField(max_length=255,  blank=True, null=True)
+    project_name = models.CharField(max_length=255,  blank=True, null=True)
     addressline1 = models.CharField(max_length=255, blank=True, null=True)
     addressline2 = models.CharField(max_length=255, blank=True, null=True)
     addressline3 = models.CharField(max_length=255, blank=True, null=True)

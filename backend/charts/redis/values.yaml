@@ -1,0 +1,6 @@
+redis:
+  username: ""
+  password: ""
+  replicaCount: 1
+  service:
+    port: "6379"

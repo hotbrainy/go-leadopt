@@ -41,3 +41,7 @@ spec:
             value: '{{ .Values.django.env.DJANGO_MONGO_PORT }}'
           - name: OPENAI_API_KEY
             value: {{ .Values.django.env.OPENAI_API_KEY }}
+          - name: REDIS_HOST
+            value: {{ .Values.django.env.REDIS_HOST }}
+          - name: REDIS_PORT
+            value: '{{ .Values.django.env.REDIS_PORT }}'

@@ -37,6 +37,11 @@ manifests:
       wait: true
       valuesFiles:
       - backend/charts/django/values.yaml
+    - name: redis
+      chartPath: backend/charts/redis
+      wait: true
+      valuesFiles:
+      - backend/charts/redis/values.yaml
       # dependsOn:
       # - name: mongodb
       # - name: postgresql
@@ -62,6 +67,11 @@ profiles:
         chartPath: backend/charts/django
         valuesFiles:
         - backend/charts/django/values.yaml
+        wait: true
+      - name: redis
+        chartPath: backend/charts/redis
+        valuesFiles:
+        - backend/charts/redis/values.yaml
         wait: true
         # dependsOn:
         # - name: mongodb

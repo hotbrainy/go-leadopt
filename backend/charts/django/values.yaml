@@ -13,3 +13,5 @@ django:
     DJANGO_DB_PORT: "5432"
     DJANGO_MONGO_HOST: "lead-optimizer-mongo"
     DJANGO_MONGO_PORT: "27017"
+    REDIS_HOST: "lead-optimizer-redis"
+    REDIS_PORT: "30004"

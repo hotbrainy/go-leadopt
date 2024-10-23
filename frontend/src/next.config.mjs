@@ -7,5 +7,5 @@ const nextConfig = {
   },
   output: "standalone",
 };
-console.log(nextConfig)
+console.log(nextConfig, process.env)
 export default nextConfig;
