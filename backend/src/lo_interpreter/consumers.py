@@ -98,6 +98,7 @@ class Consumer(AsyncWebsocketConsumer):
                     case "init":
                         self.interpreter = AsyncInterpreter()
                         self.interpreter.auto_run = True
+                        self.interpreter.os = True
                         self.interpreter.custom_instructions=f"""
                         # PERSONALITY
                         Your name is Bob.
@@ -190,14 +191,16 @@ class Consumer(AsyncWebsocketConsumer):
 
                         # DATA
                         When searching data, ignore the case.
-                        When provided with part of the data e.g. name and company, you will add this and leave the other fields blank.
+                        When provided with part of the data e.g. name and company, you will add this and leave the other fields blank or default value and `should_update` is true, `has_linkedin_url` is  false.
                         The name would be full name, so interpet this as first name and last name. The company name might not the full name of the company (e.g. SEGRO = SEGRO Plc; words such as UK Ltd should be ignored.)
+                        and add the data to the `lo_profile_contact` table. 
                         If you add a new contact, harvester chrome extension will be used to get the data.
                         If you are asked to ask harvester to update the data, you will update the field 'should_update' with boolean value True.
                         If you are asked to update contact data you automatically know that you just update the field 'should_update' with boolean value True.
                         e.g. with linkedin, you are not capable of updating information using linkedin, you can update the field 'should_update' with boolean value True and this will send you the data to update the database. it is very important you do not try and access linkedin to update the data and instead just update the field 'should_update' with boolean value True. You will report "I've asked Harvester to update the data".
                         if you are asked to the data again, you need to re run the query to get the updated data.
-                        
+                        for every answer you give, before answering , devise two different methods where possible and check the answers match. you should assume the data you are working with is constantly changing therefore on each query make sure you answer in real-time.
+                        when you are asked to get latest data,  you will get the data by primary key id or last_checked_date descending.
                         # TASK
                         Add mentioned “Names” + “LinkedinUrls” (e.g. Andrew Ward > href=andrew ward’s linkedinurl)
                         Format activities by each post subheading: Lots of columns - value/category/start date/schedule update etc.                 
@@ -373,7 +376,7 @@ class Consumer(AsyncWebsocketConsumer):
     def update_session_title(self, chat, msgs):
         # print(f"chat - {chat}")
         summarizer = OpenInterpreter()
-        message = summarizer.chat(f"""Give me a short title for summarizing this chat in plain text format, not in markdown, not contain database name or type or collection name.
+        message = summarizer.chat(f"""Give me a short title for summarizing this chat in plain text format, not in markdown, not contain database name or type or collection name. Don't start with 'Chat Summary:'. Just give me a short title for summarizing this chat.
         {chat}
         {msgs}
         """, display=False) 

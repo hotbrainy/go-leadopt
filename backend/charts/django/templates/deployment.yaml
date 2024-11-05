@@ -24,6 +24,10 @@ spec:
             containerPort: {{ .Values.django.service.port }}
           # - name: debug
           #  containerPort: {{ .Values.django.service.nodePort }}
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 10"]
         env:
           - name: DJANGO_DB_NAME
             value: {{ .Values.django.env.DJANGO_DB_NAME }}
@@ -45,3 +49,4 @@ spec:
             value: {{ .Values.django.env.REDIS_HOST }}
           - name: REDIS_PORT
             value: '{{ .Values.django.env.REDIS_PORT }}'
+      terminationGracePeriodSeconds: 30

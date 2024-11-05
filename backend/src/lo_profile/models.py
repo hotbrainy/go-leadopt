@@ -75,7 +75,7 @@ class Contact(models.Model):
     phone = models.CharField(max_length=255, blank=True, null=True)
     mobile = models.CharField(max_length=255, blank=True, null=True)
     personalemail = models.EmailField(blank=True, null=True)
-    last_checked_date = models.DateField(blank=True, null=True)
+    last_checked_date = models.DateField(auto_now_add=True, blank=True, null=True)
     
     avatar = models.URLField(max_length=2083, blank=True, null=True)
     connections = models.CharField(max_length=255, blank=True, null=True)

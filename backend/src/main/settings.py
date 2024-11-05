@@ -141,8 +141,8 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            # "hosts": [('127.0.0.1', 6379)],  # Your Redis server address
-            "hosts": [(os.getenv('REDIS_HOST',"redis"), os.getenv('REDIS_PORT',30004))],  # Your Redis server address
+            "hosts": [('127.0.0.1', 6379)],  # Your Redis server address
+            # "hosts": [(os.getenv('REDIS_HOST',"redis"), os.getenv('REDIS_PORT',30004))],  # Your Redis server address
             "capacity": 1000,  # Increase capacity if needed
             "expiry": 30,  # Expiry timeout in seconds for stale connections
         },
